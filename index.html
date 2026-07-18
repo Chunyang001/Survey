@@ -843,6 +843,47 @@ function selectBlocker(idx) {
   setTimeout(function() {
     document.getElementById('coachResult').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, 100);
+
+  // 提交数据到飞书多维表格
+  var savedAvgs = window._reportResult ? window._reportResult.avgs : null;
+  if (savedAvgs) {
+    submitToBitable(savedAvgs, layerIdx, blocker);
+  }
+}
+
+// ===== 数据提交 =====
+function submitToBitable(avgs, layerIdx, blocker) {
+  var API_URL = 'https://nlp-assessment-api.fz001-82.workers.dev';
+  
+  var payload = {
+    environment: parseFloat(avgs[0].toFixed(2)),
+    behavior: parseFloat(avgs[1].toFixed(2)),
+    capability: parseFloat(avgs[2].toFixed(2)),
+    belief: parseFloat(avgs[3].toFixed(2)),
+    identity: parseFloat(avgs[4].toFixed(2)),
+    vision: parseFloat(avgs[5].toFixed(2)),
+    blockerLayer: layers[layerIdx].name,
+    lever: blockers.map(function(b){ return b.label; }).indexOf(blocker.label) >= 0 
+      ? (blocker.id === 'clarity' ? '清晰度' : blocker.id === 'action' ? '行动力' : blocker.id === 'consistency' ? '一致性' : '方向感')
+      : '',
+    obstacleType: blocker.desc,
+    slogan: blocker.actionTitle
+  };
+
+  fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  }).then(function(resp) { return resp.json(); })
+  .then(function(data) {
+    if (data.ok) {
+      console.log('数据提交成功', data);
+    } else {
+      console.error('提交失败:', data.error);
+    }
+  }).catch(function(err) {
+    console.error('网络错误:', err);
+  });
 }
 
 // ===== 分享与重测 =====
