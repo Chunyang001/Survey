@@ -901,18 +901,17 @@ function submitToBitable(avgs, layerIdx, blocker) {
     if (resp.ok) {
       return resp.json().then(function(data) {
         console.log('数据提交成功, Issue #' + data.number);
+        showToast('✅ 数据已保存成功');
       });
     } else {
-      return resp.json().then(function(data) {
-        console.error('提交失败:', data.message);
-        showToast('数据提交失败，请重试');
-      }).catch(function() {
-        showToast('数据提交失败');
+      return resp.text().then(function(text) {
+        console.error('提交失败:', text);
+        showToast('❌ 保存失败: ' + text.substring(0, 50));
       });
     }
   }).catch(function(err) {
     console.error('网络错误:', err);
-    showToast('网络连接失败，数据未保存');
+    showToast('❌ 网络错误，数据未保存');
   });
 }
 
@@ -945,12 +944,14 @@ function showToast(msg) {
   var t = document.getElementById('toast');
   t.textContent = msg;
   t.style.display = 'block';
-  setTimeout(function() { t.style.display = 'none'; }, 2000);
+  var duration = msg.indexOf('❌') >= 0 ? 5000 : 2000;
+  setTimeout(function() { t.style.display = 'none'; }, duration);
 }
 
 function restartQuiz() {
   showPage('pageWelcome');
 }
 </script>
+<script>document.write('<!-- v20260719 -->')</script>
 </body>
 </html>
