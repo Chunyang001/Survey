@@ -845,10 +845,17 @@ function selectBlocker(idx) {
     document.getElementById('coachResult').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, 100);
 
-  // 提交数据到飞书多维表格
+  // 插入提交状态面板
+  var statusHtml = '<div id="submitStatus" style="margin-top:24px;padding:16px 20px;background:var(--card);border-radius:var(--radius);border:1px solid rgba(74,58,255,0.15);text-align:center;font-size:14px;color:var(--text-dim)">⏳ 正在保存你的测试数据...</div>';
+  document.getElementById('coachResult').insertAdjacentHTML('afterend', statusHtml);
+
+  // 提交数据
   var savedAvgs = window._reportResult ? window._reportResult.avgs : null;
   if (savedAvgs) {
     submitToBitable(savedAvgs, layerIdx, blocker);
+  } else {
+    var st = document.getElementById('submitStatus');
+    if (st) st.innerHTML = '⚠️ 数据读取异常，无法保存';
   }
 }
 
@@ -901,16 +908,22 @@ function submitToBitable(avgs, layerIdx, blocker) {
     if (resp.ok) {
       return resp.json().then(function(data) {
         console.log('数据提交成功, Issue #' + data.number);
+        var st = document.getElementById('submitStatus');
+        if (st) st.innerHTML = '✅ 数据已保存成功（编号 #'+data.number+'）';
         showToast('✅ 数据已保存成功');
       });
     } else {
       return resp.text().then(function(text) {
         console.error('提交失败:', text);
+        var st = document.getElementById('submitStatus');
+        if (st) st.innerHTML = '❌ 保存失败：' + text.substring(0, 100);
         showToast('❌ 保存失败: ' + text.substring(0, 50));
       });
     }
   }).catch(function(err) {
     console.error('网络错误:', err);
+    var st = document.getElementById('submitStatus');
+    if (st) st.innerHTML = '❌ 网络错误：' + err.message;
     showToast('❌ 网络错误，数据未保存');
   });
 }
