@@ -168,6 +168,12 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","P
 .modal-box p{font-size:13px;color:var(--text-dim);margin-bottom:20px;line-height:1.6}
 .modal-close{padding:12px 40px;border:none;border-radius:12px;background:var(--primary);color:#fff;font-size:14px;font-weight:600;cursor:pointer}
 .toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.85);color:#fff;padding:14px 28px;border-radius:12px;font-size:14px;z-index:200;display:none;animation:fadeIn .2s ease}
+/* ===== 分层洞察过渡 ===== */
+.layer-insight-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,14,26,0.92);z-index:90;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .5s ease;pointer-events:none}
+.layer-insight-overlay.show{opacity:1;pointer-events:auto}
+.layer-insight-text{font-size:22px;font-weight:600;color:#fff;text-align:center;padding:20px 32px;line-height:1.6;max-width:360px;animation:insightFadeIn .8s ease both}
+@keyframes insightFadeIn{0%{opacity:0;transform:translateY(20px) scale(0.95)}100%{opacity:1;transform:translateY(0) scale(1)}}
+
 </style>
 </head>
 <body>
@@ -284,6 +290,7 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","P
     </div>
   </div>
 </div>
+<div class="layer-insight-overlay" id="layerInsightOverlay"><div class="layer-insight-text" id="layerInsightText"></div></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -371,29 +378,29 @@ var layers = [
 
 var questions = [
   // 环境层（融入Dan Koe环境工程观点）
-  { layer: 0, text: '我的物理和数字环境（工作空间、关注的账号）在支持我想要的改变', reverse: false },
-  { layer: 0, text: '身边的人在支持我成长，而不是把我拉回旧模式', reverse: false },
-  { layer: 0, text: '我的环境让我觉得改变很容易，而不是很困难', reverse: false },
+  { layer: 0, text: '你的书桌、手机、常去的地方，是在悄悄推你向前，还是在默默拖你后腿？', reverse: false },
+  { layer: 0, text: '你身边的人，是在拉你向上，还是把你往回拽？', reverse: false },
+  { layer: 0, text: '在你的日常里，做正确的事是顺势而为，还是需要对抗整个环境？', reverse: false },
   // 行为层（融入Dan Koe每日杠杆+控制论观点）
-  { layer: 1, text: '我每天在做的事情，是在靠近我想要的生活，而不是远离它', reverse: false },
-  { layer: 1, text: '我不需要强迫自己行动，因为好的行为已经成为我的自然表达', reverse: false },
-  { layer: 1, text: '我的行动靠的是习惯和系统，而不是靠意志力硬撑', reverse: false },
+  { layer: 1, text: '今天的你，是在靠近想要的生活，还是在远离它？', reverse: false },
+  { layer: 1, text: '好的习惯对你来说是自然发生，还是需要每天提醒自己？', reverse: false },
+  { layer: 1, text: '你靠什么在行动——是已经建好的系统，还是每天的意志力？', reverse: false },
   // 能力层（融入Dan Koe自我实验+项目式学习观点）
-  { layer: 2, text: '我通过实践和实验来验证知识，而不是只停留在"知道"的层面', reverse: false },
-  { layer: 2, text: '我有自己的一套方法，是在实践中总结出来的，而不是照搬别人的', reverse: false },
-  { layer: 2, text: '我把生活当科学项目：假设→实验→记录→迭代', reverse: false },
+  { layer: 2, text: '你学到的东西，有多少真正用在了实践中？', reverse: false },
+  { layer: 2, text: '你的方法是别人教的，还是自己摸索出来的？', reverse: false },
+  { layer: 2, text: '面对未知，你是兴奋地去试，还是焦虑地等答案？', reverse: false },
   // 信念层（融入Dan Koe反愿景+潜意识观点）
-  { layer: 3, text: '我有一个清晰的"反愿景"——我知道如果继续这样下去，我会过什么样的生活', reverse: false },
-  { layer: 3, text: '我能看清我的拖延背后真正在害怕什么（失败、评判、不确定性）', reverse: false },
-  { layer: 3, text: '我相信改变是安全的，不会因为改变而失去重要的东西', reverse: false },
+  { layer: 3, text: '如果继续这样下去，你知道自己 5 年后会过什么样的生活吗？', reverse: false },
+  { layer: 3, text: '你的拖延，你看得清它背后在害怕什么吗？', reverse: false },
+  { layer: 3, text: '改变对你来说，是安全的冒险，还是危险的未知？', reverse: false },
   // 身份层（融入Dan Koe核心观点）
-  { layer: 4, text: '我已经成为了那个我想要成为的人，而不只是"想要成为"', reverse: false },
-  { layer: 4, text: '我把自己定义为"一个持续成长、不断学习的人"', reverse: false },
-  { layer: 4, text: '我相信自己有无限的成长空间，未来还有很大的可能性', reverse: false },
+  { layer: 4, text: '你已经成为了那个人，还是还在追逐那个影子？', reverse: false },
+  { layer: 4, text: '你如何定义自己——是一个正在成长的人，还是一个已经定型的人？', reverse: false },
+  { layer: 4, text: '你觉得自己还有多少没被开发的可能性？', reverse: false },
   // 愿景层（融入Dan Koe愿景+游戏化观点）
-  { layer: 5, text: '我能清晰地描绘出3年后我想要过的生活是什么样的', reverse: false },
-  { layer: 5, text: '我的改变是为了成为更好的自己，而不是为了向别人证明什么', reverse: false },
-  { layer: 5, text: '我把人生当作一场游戏，有清晰的反愿景（Game Over）和愿景（通关画面）', reverse: false }
+  { layer: 5, text: '3 年后一个普通的周二，你能清晰地描绘那是什么样子吗？', reverse: false },
+  { layer: 5, text: '你的努力，是为了自己，还是为了证明给谁看？', reverse: false },
+  { layer: 5, text: '你的人生有方向吗——你知道自己要去哪里，而不是随波逐流？', reverse: false }
 ];
 
 var likertLabels = ['完全不是我', '不太像我', '有点像我', '挺像我的', '说的就是我'];
@@ -545,14 +552,45 @@ function prevQuestion() {
   if (currentQ > 0) { currentQ--; renderQuestion(); }
 }
 
+var layerInsights = [
+  '🗺️ 你已经看清了自己所在的地形',
+  '🪞 行动是最诚实的镜子',
+  '🧰 你开始看见自己的工具箱',
+  '📜 信念是你给自己写下的剧本',
+  '✨ 你正在成为那个人'
+];
+
 function nextQuestion() {
   if (answers[currentQ] === null) return;
   if (currentQ < questions.length - 1) {
+    // 检查是否完成一层的最后一题（index 2,5,8,11,14 → 层 0-4）
+    var currentLayer = questions[currentQ].layer;
+    var layerQIndex = currentQ - currentLayer * 3; // 0,1,2 within layer
     currentQ++;
-    renderQuestion();
+    // 如果是最后一层（愿景层 index 15-17），不显示洞察过渡
+    if (layerQIndex === 2 && currentLayer < 5) {
+      showLayerInsight(layerInsights[currentLayer]);
+    } else {
+      renderQuestion();
+    }
   } else {
     generateReport();
   }
+}
+
+function showLayerInsight(text) {
+  var overlay = document.getElementById('layerInsightOverlay');
+  var textEl = document.getElementById('layerInsightText');
+  textEl.textContent = text;
+  // 重新触发动画
+  textEl.style.animation = 'none';
+  void textEl.offsetHeight;
+  textEl.style.animation = 'insightFadeIn .8s ease both';
+  overlay.classList.add('show');
+  setTimeout(function() {
+    overlay.classList.remove('show');
+    setTimeout(function() { renderQuestion(); }, 300);
+  }, 1500);
 }
 
 // ===== 计分与报告 =====
