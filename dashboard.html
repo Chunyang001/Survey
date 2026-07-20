@@ -2,111 +2,116 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>数据看板 · NLP卡点定位器</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<title>数据管理 · NLP卡点定位器</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-:root{--primary:#4A3AFF;--primary-light:#6C5CE7;--bg:#0F0E1A;--card:#1A1830;--card-light:#252345;--text:#E8E6F0;--text-dim:#9B97B0;--accent:#00D2FF;--accent2:#FF6B9D;--success:#00E676;--warning:#FFD93D;--radius:16px;--shadow:0 8px 32px rgba(0,0,0,0.3)}
-html,body{min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
-body{padding:20px 16px 60px;max-width:800px;margin:0 auto}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:#f5f6fa;color:#2d3436;padding:20px 16px 60px}
+.container{max-width:1200px;margin:0 auto}
 
-/* 头部 */
-.header{text-align:center;padding:24px 0 20px}
-.header h1{font-size:22px;font-weight:700;background:linear-gradient(135deg,#fff,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px}
-.header p{font-size:13px;color:var(--text-dim)}
-.refresh-btn{display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:8px 18px;background:var(--card);border:1px solid rgba(74,58,255,0.2);border-radius:20px;color:var(--accent);font-size:13px;cursor:pointer;transition:all .2s}
-.refresh-btn:hover{background:var(--card-light);border-color:var(--accent)}
-.refresh-btn.loading{opacity:0.6;pointer-events:none}
+/* 顶栏 */
+.top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px}
+.top-bar h1{font-size:18px;font-weight:700;color:#2d3436}
+.top-bar .info{font-size:13px;color:#636e72}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{padding:8px 16px;border:none;border-radius:8px;font-size:13px;cursor:pointer;font-weight:500;transition:all .2s}
+.btn-primary{background:#4A3AFF;color:#fff}
+.btn-primary:hover{background:#3a2aef}
+.btn-outline{background:#fff;color:#4A3AFF;border:1px solid #4A3AFF}
+.btn-outline:hover{background:#f0eeff}
+.btn-success{background:#00b894;color:#fff}
+.btn-success:hover{background:#00a381}
+.btn:disabled{opacity:.5;cursor:not-allowed}
 
-/* 统计卡片 */
-.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
-.stat-card{background:var(--card);border-radius:var(--radius);padding:16px;text-align:center;border:1px solid rgba(74,58,255,0.1)}
-.stat-num{font-size:28px;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--primary-light));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.stat-label{font-size:11px;color:var(--text-dim);margin-top:4px}
+/* 筛选栏 */
+.filter-bar{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.filter-bar select,.filter-bar input{padding:7px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;background:#fff;color:#2d3436;outline:none}
+.filter-bar select:focus,.filter-bar input:focus{border-color:#4A3AFF}
+.filter-bar input{min-width:160px}
+.filter-bar .count{font-size:13px;color:#636e72;margin-left:auto}
 
-/* 区域标题 */
-.section-title{font-size:16px;font-weight:600;margin:28px 0 14px;padding-left:4px;display:flex;align-items:center;gap:8px}
-.section-title::before{content:'';width:4px;height:18px;background:linear-gradient(180deg,var(--primary),var(--accent));border-radius:2px}
+/* 表格 */
+.table-wrap{background:#fff;border-radius:12px;overflow-x:auto;box-shadow:0 2px 12px rgba(0,0,0,0.06)}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:1000px}
+thead{background:#f8f9fa;position:sticky;top:0;z-index:1}
+th{padding:12px 10px;text-align:left;font-weight:600;color:#636e72;font-size:12px;white-space:nowrap;border-bottom:2px solid #eee;cursor:pointer;user-select:none}
+th:hover{color:#4A3AFF}
+th .sort-arrow{font-size:10px;margin-left:4px;opacity:.4}
+th.sorted .sort-arrow{opacity:1;color:#4A3AFF}
+td{padding:10px;color:#2d3436;border-bottom:1px solid #f1f2f6;white-space:nowrap}
+tr:hover td{background:#f8f9fa}
+.score{font-weight:600;font-variant-numeric:tabular-nums}
+.score-low{color:#e17055}
+.score-mid{color:#fdcb6e}
+.score-high{color:#00b894}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600}
+.tag-env{background:#e0f7fa;color:#00838f}
+.tag-beh{background:#e8f5e9;color:#2e7d32}
+.tag-cap{background:#fff8e1;color:#f57f17}
+.tag-bel{background:#fce4ec;color:#c62828}
+.tag-iden{background:#ede7f6;color:#4527a0}
+.tag-vis{background:#e8eaf6;color:#283593}
+.blocker-cell{white-space:normal;max-width:220px;font-size:12px;color:#636e72;line-height:1.4}
 
-/* 图表容器 */
-.chart-box{background:var(--card);border-radius:var(--radius);padding:20px;margin-bottom:16px;border:1px solid rgba(74,58,255,0.1)}
-.chart-box h3{font-size:14px;color:var(--text-dim);margin-bottom:16px;font-weight:500}
-.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-@media(max-width:600px){.chart-row{grid-template-columns:1fr}}
+/* 空/加载态 */
+.state-msg{text-align:center;padding:60px 20px;color:#b2bec3}
+.state-msg .icon{font-size:40px;margin-bottom:10px}
 
-/* 数据表格 */
-.table-wrap{background:var(--card);border-radius:var(--radius);overflow:hidden;border:1px solid rgba(74,58,255,0.1);margin-bottom:16px;overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:13px;min-width:700px}
-thead{background:var(--card-light)}
-th{padding:12px 10px;text-align:left;font-weight:600;color:var(--accent);font-size:12px;white-space:nowrap;border-bottom:1px solid rgba(74,58,255,0.15)}
-td{padding:10px;color:var(--text);border-bottom:1px solid rgba(255,255,255,0.04);white-space:nowrap}
-tr:hover td{background:rgba(74,58,255,0.05)}
-.score-cell{font-weight:600;font-variant-numeric:tabular-nums}
-.score-high{color:var(--success)}
-.score-mid{color:var(--warning)}
-.score-low{color:var(--accent2)}
-.bottleneck-tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600}
-.bottleneck-环境{background:rgba(0,210,255,0.15);color:var(--accent)}
-.bottleneck-行为{background:rgba(0,230,118,0.15);color:var(--success)}
-.bottleneck-能力{background:rgba(255,217,61,0.15);color:var(--warning)}
-.bottleneck-信念{background:rgba(255,107,157,0.15);color:var(--accent2)}
-.bottleneck-身份{background:rgba(108,92,231,0.15);color:var(--primary-light)}
-.bottleneck-愿景{background:rgba(74,58,255,0.15);color:var(--primary)}
+/* 底部 */
+.footer{text-align:center;padding:24px 0 12px;color:#b2bec3;font-size:11px}
 
-/* 加载/空状态 */
-.loading-state{text-align:center;padding:60px 20px;color:var(--text-dim)}
-.loading-state .spinner{width:36px;height:36px;border:3px solid var(--card-light);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 16px}
-@keyframes spin{to{transform:rotate(360deg)}}
-.empty-state{text-align:center;padding:60px 20px;color:var(--text-dim)}
-.empty-state .icon{font-size:48px;margin-bottom:12px}
-
-/* 分布统计 */
-.dist-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
-@media(max-width:600px){.dist-grid{grid-template-columns:1fr}}
-.dist-card{background:var(--card);border-radius:var(--radius);padding:16px;border:1px solid rgba(74,58,255,0.1)}
-.dist-card h3{font-size:13px;color:var(--text-dim);margin-bottom:12px;font-weight:500}
-.dist-item{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
-.dist-item:last-child{border-bottom:none}
-.dist-name{font-size:13px;color:var(--text)}
-.dist-bar-wrap{flex:1;margin:0 12px;height:6px;background:rgba(255,255,255,0.05);border-radius:3px;overflow:hidden}
-.dist-bar{height:100%;border-radius:3px;transition:width .6s ease}
-.dist-count{font-size:12px;color:var(--text-dim);min-width:20px;text-align:right}
-
-.footer{text-align:center;padding:32px 0 16px;color:var(--text-dim);font-size:11px}
+@media(max-width:768px){
+  .top-bar{flex-direction:column;align-items:flex-start}
+  .filter-bar{flex-direction:column}
+  .filter-bar .count{margin-left:0;margin-top:4px}
+}
 </style>
 </head>
 <body>
 
-<div class="header">
-  <h1>📊 NLP卡点定位器 · 数据看板</h1>
-  <p>实时展示所有测试结果与统计分析</p>
-  <button class="refresh-btn" onclick="loadData()">🔄 刷新数据</button>
-</div>
-
-<div id="content">
-  <div class="loading-state">
-    <div class="spinner"></div>
-    <p>正在加载数据...</p>
+<div class="container">
+  <div class="top-bar">
+    <div>
+      <h1>NLP卡点定位器 · 数据管理</h1>
+      <div class="info" id="updateInfo">加载中...</div>
+    </div>
+    <div class="actions">
+      <button class="btn btn-outline" onclick="loadData()">刷新数据</button>
+      <button class="btn btn-success" onclick="exportExcel()">导出 Excel</button>
+    </div>
   </div>
+
+  <div class="filter-bar">
+    <select id="filterBottleneck" onchange="applyFilters()">
+      <option value="">全部卡点层</option>
+    </select>
+    <select id="filterLever" onchange="applyFilters()">
+      <option value="">全部撬动点</option>
+    </select>
+    <input type="text" id="searchInput" placeholder="搜索昵称/阻碍类型..." oninput="applyFilters()">
+    <span class="count" id="filterCount"></span>
+  </div>
+
+  <div id="content">
+    <div class="state-msg"><div class="icon">⏳</div><p>正在加载数据...</p></div>
+  </div>
+
+  <div class="footer">数据实时同步自 GitHub Issues</div>
 </div>
 
 <script>
 const REPO = 'Chunyang001/Survey';
 const API = `https://api.github.com/repos/${REPO}/issues`;
-const LAYERS = ['环境层','行为层','能力层','信念层','身份层','愿景层'];
-const LAYER_COLORS = ['#00D2FF','#00E676','#FFD93D','#FF6B9D','#6C5CE7','#4A3AFF'];
-
 let allData = [];
+let filteredData = [];
+let sortCol = null;
+let sortAsc = true;
 
 async function loadData() {
-  const btn = document.querySelector('.refresh-btn');
-  btn.classList.add('loading');
-  btn.textContent = '⏳ 加载中...';
-
   try {
     let page = 1, all = [];
     while (true) {
@@ -120,310 +125,220 @@ async function loadData() {
       page++;
     }
 
-    // 过滤真实测试数据（排除连通性测试）
     allData = all
-      .filter(i => i.title.startsWith('[测试]'))
+      .filter(i => i.title.startsWith('[测试]') || i.labels.some(l => l.name === 'test-data'))
+      .filter(i => !i.title.includes('CORS测试') && !i.title.includes('API测试'))
       .map(parseIssue)
       .filter(d => d !== null)
       .sort((a, b) => new Date(b.raw.created_at) - new Date(a.raw.created_at));
 
-    render();
-  } catch (e) {
-    document.getElementById('content').innerHTML = `
-      <div class="empty-state">
-        <div class="icon">⚠️</div>
-        <p>数据加载失败: ${e.message}</p>
-        <p style="margin-top:8px;font-size:12px">请稍后点击刷新重试</p>
-      </div>`;
-  }
+    populateFilters();
+    applyFilters();
 
-  btn.classList.remove('loading');
-  btn.textContent = '🔄 刷新数据';
+    const now = new Date().toLocaleString('zh-CN');
+    document.getElementById('updateInfo').textContent = `共 ${allData.length} 条记录 · 更新于 ${now}`;
+  } catch (e) {
+    document.getElementById('content').innerHTML = `<div class="state-msg"><div class="icon">⚠️</div><p>数据加载失败: ${e.message}</p></div>`;
+  }
 }
 
 function parseIssue(issue) {
   const body = issue.body || '';
   const lines = body.split('\n').filter(l => l.trim());
-  const data = { raw: issue };
+  const data = { raw: issue, nickname: '' };
 
-  // 从 Markdown 表格解析
   for (const line of lines) {
-    const match = line.match(/\|\s*(.+?)\s*\|\s*(.+?)\s*\|/);
-    if (!match) continue;
-    const key = match[1].trim();
-    const val = match[2].trim();
+    // 支持 Markdown 表格格式和 普通键值格式
+    let key, val;
+    const tableMatch = line.match(/\|\s*(.+?)\s*\|\s*(.+?)\s*\|/);
+    const kvMatch = line.match(/^(.+?)[:：]\s*(.+)$/);
 
-    if (key === '字段' || key === '---') continue;
+    if (tableMatch) {
+      key = tableMatch[1].trim();
+      val = tableMatch[2].trim();
+    } else if (kvMatch) {
+      key = kvMatch[1].trim();
+      val = kvMatch[2].trim();
+    } else continue;
+
+    if (key === '字段' || key.startsWith('---')) continue;
 
     if (key === '测试时间') data.time = val;
     else if (key === '昵称') data.nickname = val;
-    else if (key === '环境层得分') data.env = parseFloat(val);
-    else if (key === '行为层得分') data.beh = parseFloat(val);
-    else if (key === '能力层得分') data.cap = parseFloat(val);
-    else if (key === '信念层得分') data.bel = parseFloat(val);
-    else if (key === '身份层得分') data.iden = parseFloat(val);
-    else if (key === '愿景层得分') data.vision = parseFloat(val);
+    else if (key === '环境层得分' || key === '环境层') data.env = parseFloat(val);
+    else if (key === '行为层得分' || key === '行为层') data.beh = parseFloat(val);
+    else if (key === '能力层得分' || key === '能力层') data.cap = parseFloat(val);
+    else if (key === '信念层得分' || key === '信念层') data.bel = parseFloat(val);
+    else if (key === '身份层得分' || key === '身份层') data.iden = parseFloat(val);
+    else if (key === '愿景层得分' || key === '愿景层') data.vision = parseFloat(val);
     else if (key === '卡点层') data.bottleneck = val;
     else if (key === '撬动点') data.lever = val;
     else if (key === '阻碍类型') data.blocker = val;
     else if (key === '行动口号') data.slogan = val;
   }
 
-  // 验证必要字段
-  if (data.env === undefined || !data.bottleneck) return null;
+  // 如果没有昵称，从标题中提取（如 "[测试] 2026-07-18 23:52"）
+  if (!data.nickname || data.nickname === '') {
+    data.nickname = '未命名';
+  }
+
+  if (data.env === undefined || isNaN(data.env)) return null;
   return data;
 }
 
+function populateFilters() {
+  const bSet = new Set(), lSet = new Set();
+  allData.forEach(d => {
+    if (d.bottleneck) bSet.add(d.bottleneck);
+    if (d.lever) lSet.add(d.lever);
+  });
+
+  const bSel = document.getElementById('filterBottleneck');
+  const lSel = document.getElementById('filterLever');
+  bSel.innerHTML = '<option value="">全部卡点层</option>';
+  lSel.innerHTML = '<option value="">全部撬动点</option>';
+
+  [...bSet].sort().forEach(v => { bSel.innerHTML += `<option value="${v}">${v}</option>`; });
+  [...lSet].sort().forEach(v => { lSel.innerHTML += `<option value="${v}">${v}</option>`; });
+}
+
+function applyFilters() {
+  const bVal = document.getElementById('filterBottleneck').value;
+  const lVal = document.getElementById('filterLever').value;
+  const search = document.getElementById('searchInput').value.toLowerCase().trim();
+
+  filteredData = allData.filter(d => {
+    if (bVal && d.bottleneck !== bVal) return false;
+    if (lVal && d.lever !== lVal) return false;
+    if (search) {
+      const text = `${d.nickname} ${d.blocker} ${d.slogan} ${d.bottleneck}`.toLowerCase();
+      if (!text.includes(search)) return false;
+    }
+    return true;
+  });
+
+  if (sortCol) doSort(false);
+  render();
+}
+
+function toggleSort(col) {
+  if (sortCol === col) {
+    sortAsc = !sortAsc;
+  } else {
+    sortCol = col;
+    sortAsc = true;
+  }
+  doSort(true);
+  render();
+}
+
+function doSort(rerender) {
+  if (!sortCol) return;
+  filteredData.sort((a, b) => {
+    let va = a[sortCol], vb = b[sortCol];
+    if (typeof va === 'number' && typeof vb === 'number') return sortAsc ? va - vb : vb - va;
+    va = (va || '').toString(); vb = (vb || '').toString();
+    return sortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+  });
+}
+
 function getScoreClass(v) {
-  if (v >= 3.5) return 'score-high';
+  if (isNaN(v)) return '';
+  if (v >= 4) return 'score-high';
   if (v >= 2.5) return 'score-mid';
   return 'score-low';
 }
 
-function getBottleneckClass(name) {
-  if (name.includes('环境')) return 'bottleneck-环境';
-  if (name.includes('行为')) return 'bottleneck-行为';
-  if (name.includes('能力')) return 'bottleneck-能力';
-  if (name.includes('信念')) return 'bottleneck-信念';
-  if (name.includes('身份')) return 'bottleneck-身份';
-  if (name.includes('愿景')) return 'bottleneck-愿景';
+function getTagClass(name) {
+  if (!name) return '';
+  if (name.includes('环境')) return 'tag-env';
+  if (name.includes('行为')) return 'tag-beh';
+  if (name.includes('能力')) return 'tag-cap';
+  if (name.includes('信念')) return 'tag-bel';
+  if (name.includes('身份')) return 'tag-iden';
+  if (name.includes('愿景')) return 'tag-vis';
   return '';
-}
-
-function avg(arr) {
-  if (!arr.length) return 0;
-  return (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2);
 }
 
 function render() {
   const c = document.getElementById('content');
+  document.getElementById('filterCount').textContent = `显示 ${filteredData.length} / ${allData.length} 条`;
 
-  if (allData.length === 0) {
-    c.innerHTML = `<div class="empty-state"><div class="icon">📭</div><p>暂无测试数据</p><p style="margin-top:8px;font-size:12px">完成测试后数据将自动出现在这里</p></div>`;
+  if (filteredData.length === 0) {
+    c.innerHTML = `<div class="state-msg"><div class="icon">📭</div><p>暂无匹配数据</p></div>`;
     return;
   }
 
-  const n = allData.length;
-  const avgScores = [
-    avg(allData.map(d => d.env)),
-    avg(allData.map(d => d.beh)),
-    avg(allData.map(d => d.cap)),
-    avg(allData.map(d => d.bel)),
-    avg(allData.map(d => d.iden)),
-    avg(allData.map(d => d.vision))
-  ];
+  const sortArrow = (col) => {
+    if (sortCol === col) return `<span class="sort-arrow">${sortAsc ? '▲' : '▼'}</span>`;
+    return `<span class="sort-arrow">⇅</span>`;
+  };
+  const thClass = (col) => sortCol === col ? 'sorted' : '';
 
-  // 卡点分布
-  const bottleneckCount = {};
-  allData.forEach(d => {
-    bottleneckCount[d.bottleneck] = (bottleneckCount[d.bottleneck] || 0) + 1;
-  });
-
-  // 撬动点分布
-  const leverCount = {};
-  allData.forEach(d => {
-    leverCount[d.lever] = (leverCount[d.lever] || 0) + 1;
-  });
-
-  // 最低层得分统计
-  const minLayerCount = {};
-  allData.forEach(d => {
-    const scores = [d.env, d.beh, d.cap, d.bel, d.iden, d.vision];
-    const minScore = Math.min(...scores);
-    const minIdx = scores.indexOf(minScore);
-    const layerName = LAYERS[minIdx];
-    minLayerCount[layerName] = (minLayerCount[layerName] || 0) + 1;
-  });
-
-  let html = '';
-
-  // 统计卡片
-  html += `<div class="stats-grid">
-    <div class="stat-card"><div class="stat-num">${n}</div><div class="stat-label">总测试次数</div></div>
-    <div class="stat-card"><div class="stat-num">${avg(allData.map(d => {const s=[d.env,d.beh,d.cap,d.bel,d.iden,d.vision];return Math.min(...s)}))}</div><div class="stat-label">平均最低分</div></div>
-    <div class="stat-card"><div class="stat-num">${Object.entries(bottleneckCount).sort((a,b)=>b[1]-a[1])[0]?.[0] || '-'}</div><div class="stat-label">最常见卡点</div></div>
-  </div>`;
-
-  // 雷达图 + 柱状图
-  html += `<div class="section-title">六层得分分析</div>`;
-  html += `<div class="chart-row">
-    <div class="chart-box"><h3>平均得分雷达图</h3><canvas id="radarChart"></canvas></div>
-    <div class="chart-box"><h3>各层平均得分</h3><canvas id="barChart"></canvas></div>
-  </div>`;
-
-  // 分布统计
-  html += `<div class="section-title">卡点 & 撬动点分布</div>`;
-  html += `<div class="dist-grid">`;
-
-  // 卡点分布
-  html += `<div class="dist-card"><h3>🎯 卡点层分布</h3>`;
-  const bTotal = Object.values(bottleneckCount).reduce((a,b)=>a+b,0);
-  Object.entries(bottleneckCount).sort((a,b)=>b[1]-a[1]).forEach(([name, count]) => {
-    const pct = (count / bTotal * 100).toFixed(0);
-    const cls = getBottleneckClass(name);
-    html += `<div class="dist-item">
-      <span class="dist-name"><span class="bottleneck-tag ${cls}">${name}</span></span>
-      <div class="dist-bar-wrap"><div class="dist-bar" style="width:${pct}%;background:${getLayerColorByName(name)}"></div></div>
-      <span class="dist-count">${count}</span>
-    </div>`;
-  });
-  html += `</div>`;
-
-  // 撬动点分布
-  html += `<div class="dist-card"><h3>🔑 撬动点分布</h3>`;
-  const lTotal = Object.values(leverCount).reduce((a,b)=>a+b,0);
-  const leverColors = {'清晰度':'#00D2FF','行动力':'#00E676','一致性':'#FFD93D','方向感':'#FF6B9D'};
-  Object.entries(leverCount).sort((a,b)=>b[1]-a[1]).forEach(([name, count]) => {
-    const pct = (count / lTotal * 100).toFixed(0);
-    html += `<div class="dist-item">
-      <span class="dist-name">${name}</span>
-      <div class="dist-bar-wrap"><div class="dist-bar" style="width:${pct}%;background:${leverColors[name]||'#6C5CE7'}"></div></div>
-      <span class="dist-count">${count}</span>
-    </div>`;
-  });
-  html += `</div></div>`;
-
-  // 最低得分层分布
-  html += `<div class="dist-card" style="margin-bottom:16px"><h3>⚡ 最弱层分布（得分最低的层）</h3>`;
-  const mTotal = Object.values(minLayerCount).reduce((a,b)=>a+b,0);
-  Object.entries(minLayerCount).sort((a,b)=>b[1]-a[1]).forEach(([name, count]) => {
-    const pct = (count / mTotal * 100).toFixed(0);
-    const cls = getBottleneckClass(name);
-    html += `<div class="dist-item">
-      <span class="dist-name"><span class="bottleneck-tag ${cls}">${name}</span></span>
-      <div class="dist-bar-wrap"><div class="dist-bar" style="width:${pct}%;background:${getLayerColorByName(name)}"></div></div>
-      <span class="dist-count">${count}</span>
-    </div>`;
-  });
-  html += `</div>`;
-
-  // 数据表格
-  html += `<div class="section-title">全部测试记录</div>`;
-  html += `<div class="table-wrap"><table>
+  let html = `<div class="table-wrap"><table>
     <thead><tr>
-      <th>#</th><th>时间</th><th>环境</th><th>行为</th><th>能力</th><th>信念</th><th>身份</th><th>愿景</th><th>卡点</th><th>撬动点</th><th>阻碍类型</th>
+      <th class="${thClass('nickname')}" onclick="toggleSort('nickname')">昵称${sortArrow('nickname')}</th>
+      <th class="${thClass('time')}" onclick="toggleSort('time')">测试时间${sortArrow('time')}</th>
+      <th class="${thClass('env')}" onclick="toggleSort('env')">环境层${sortArrow('env')}</th>
+      <th class="${thClass('beh')}" onclick="toggleSort('beh')">行为层${sortArrow('beh')}</th>
+      <th class="${thClass('cap')}" onclick="toggleSort('cap')">能力层${sortArrow('cap')}</th>
+      <th class="${thClass('bel')}" onclick="toggleSort('bel')">信念层${sortArrow('bel')}</th>
+      <th class="${thClass('iden')}" onclick="toggleSort('iden')">身份层${sortArrow('iden')}</th>
+      <th class="${thClass('vision')}" onclick="toggleSort('vision')">愿景层${sortArrow('vision')}</th>
+      <th class="${thClass('bottleneck')}" onclick="toggleSort('bottleneck')">卡点层${sortArrow('bottleneck')}</th>
+      <th class="${thClass('lever')}" onclick="toggleSort('lever')">撬动点${sortArrow('lever')}</th>
+      <th>阻碍类型</th>
+      <th>行动口号</th>
     </tr></thead><tbody>`;
 
-  allData.forEach((d, i) => {
+  filteredData.forEach(d => {
     const scores = [d.env, d.beh, d.cap, d.bel, d.iden, d.vision];
     html += `<tr>
-      <td>${i + 1}</td>
+      <td>${d.nickname || '-'}</td>
       <td>${d.time || '-'}</td>
-      ${scores.map(s => `<td class="score-cell ${getScoreClass(s)}">${s.toFixed(2)}</td>`).join('')}
-      <td><span class="bottleneck-tag ${getBottleneckClass(d.bottleneck)}">${d.bottleneck}</span></td>
+      ${scores.map(s => `<td class="score ${getScoreClass(s)}">${isNaN(s) ? '-' : s.toFixed(2)}</td>`).join('')}
+      <td><span class="tag ${getTagClass(d.bottleneck)}">${d.bottleneck || '-'}</span></td>
       <td>${d.lever || '-'}</td>
-      <td style="white-space:normal;max-width:200px;font-size:12px;color:var(--text-dim)">${d.blocker || '-'}</td>
+      <td class="blocker-cell">${d.blocker || '-'}</td>
+      <td>${d.slogan || '-'}</td>
     </tr>`;
   });
 
   html += `</tbody></table></div>`;
-
-  // 行动口号
-  html += `<div class="section-title">行动口号词云</div>`;
-  html += `<div class="chart-box" style="text-align:center;line-height:2.2">`;
-  allData.forEach(d => {
-    if (d.slogan) {
-      html += `<span style="display:inline-block;margin:4px 6px;padding:4px 12px;background:var(--card-light);border-radius:20px;font-size:12px;color:var(--accent);border:1px solid rgba(0,210,255,0.15)">${d.slogan}</span>`;
-    }
-  });
-  html += `</div>`;
-
-  html += `<div class="footer">数据实时同步自 GitHub Issues · 每次测试自动记录</div>`;
-
   c.innerHTML = html;
-
-  // 渲染图表
-  renderRadarChart(avgScores);
-  renderBarChart(avgScores);
 }
 
-function getLayerColorByName(name) {
-  const idx = LAYERS.findIndex(l => name.includes(l.replace('层','')));
-  return idx >= 0 ? LAYER_COLORS[idx] : '#6C5CE7';
-}
+function exportExcel() {
+  if (!filteredData.length) { alert('没有可导出的数据'); return; }
 
-function renderRadarChart(avgScores) {
-  const ctx = document.getElementById('radarChart');
-  if (!ctx) return;
+  const rows = filteredData.map((d, i) => ({
+    '序号': i + 1,
+    '昵称': d.nickname || '',
+    '测试时间': d.time || '',
+    '环境层得分': isNaN(d.env) ? '' : d.env,
+    '行为层得分': isNaN(d.beh) ? '' : d.beh,
+    '能力层得分': isNaN(d.cap) ? '' : d.cap,
+    '信念层得分': isNaN(d.bel) ? '' : d.bel,
+    '身份层得分': isNaN(d.iden) ? '' : d.iden,
+    '愿景层得分': isNaN(d.vision) ? '' : d.vision,
+    '卡点层': d.bottleneck || '',
+    '撬动点': d.lever || '',
+    '阻碍类型': d.blocker || '',
+    '行动口号': d.slogan || ''
+  }));
 
-  const datasets = [{
-    label: '平均得分',
-    data: avgScores.map(Number),
-    backgroundColor: 'rgba(0,210,255,0.15)',
-    borderColor: '#00D2FF',
-    borderWidth: 2,
-    pointBackgroundColor: '#00D2FF',
-    pointRadius: 4
-  }];
+  const ws = XLSX.utils.json_to_sheet(rows);
+  // 设置列宽
+  ws['!cols'] = [
+    {wch:5},{wch:12},{wch:18},{wch:10},{wch:10},{wch:10},{wch:10},{wch:10},{wch:10},{wch:10},{wch:10},{wch:30},{wch:30}
+  ];
 
-  // 如果有多个测试，叠加显示最近5次
-  const recent = allData.slice(0, Math.min(5, allData.length));
-  const lineColors = ['rgba(255,107,157,0.6)','rgba(108,92,231,0.6)','rgba(0,230,118,0.6)','rgba(255,217,61,0.6)','rgba(74,58,255,0.6)'];
-  recent.forEach((d, i) => {
-    datasets.push({
-      label: d.time || `#${i+1}`,
-      data: [d.env, d.beh, d.cap, d.bel, d.iden, d.vision],
-      backgroundColor: 'transparent',
-      borderColor: lineColors[i],
-      borderWidth: 1.5,
-      pointRadius: 2,
-      borderDash: [4, 4]
-    });
-  });
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '测试数据');
 
-  new Chart(ctx, {
-    type: 'radar',
-    data: {
-      labels: LAYERS,
-      datasets: datasets
-    },
-    options: {
-      responsive: true,
-      scales: {
-        r: {
-          min: 0, max: 5,
-          ticks: { stepSize: 1, color: '#9B97B0', backdropColor: 'transparent', font: { size: 10 } },
-          grid: { color: 'rgba(255,255,255,0.06)' },
-          angleLines: { color: 'rgba(255,255,255,0.06)' },
-          pointLabels: { color: '#E8E6F0', font: { size: 12 } }
-        }
-      },
-      plugins: {
-        legend: { display: allData.length > 1, labels: { color: '#9B97B0', font: { size: 11 }, boxWidth: 12 } }
-      }
-    }
-  });
-}
-
-function renderBarChart(avgScores) {
-  const ctx = document.getElementById('barChart');
-  if (!ctx) return;
-
-  new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: LAYERS,
-      datasets: [{
-        label: '平均得分',
-        data: avgScores.map(Number),
-        backgroundColor: LAYER_COLORS.map(c => c + '40'),
-        borderColor: LAYER_COLORS,
-        borderWidth: 2,
-        borderRadius: 8,
-        barThickness: 28
-      }]
-    },
-    options: {
-      responsive: true,
-      scales: {
-        x: { ticks: { color: '#9B97B0', font: { size: 11 } }, grid: { display: false } },
-        y: { min: 0, max: 5, ticks: { stepSize: 1, color: '#9B97B0', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.06)' } }
-      },
-      plugins: {
-        legend: { display: false }
-      }
-    }
-  });
+  const now = new Date();
+  const ts = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
+  XLSX.writeFile(wb, `NLP测试数据_${ts}.xlsx`);
 }
 
 // 初始加载
