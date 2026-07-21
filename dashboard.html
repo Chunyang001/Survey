@@ -115,7 +115,7 @@ async function loadData() {
   try {
     let page = 1, all = [];
     while (true) {
-      const resp = await fetch(`${API}?state=all&per_page=100&page=${page}`, {
+      const resp = await fetch(`${API}?state=open&per_page=100&page=${page}`, {
         headers: { 'Accept': 'application/vnd.github.v3+json' }
       });
       const data = await resp.json();
