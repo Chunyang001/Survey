@@ -644,7 +644,14 @@ function showLayerInsight(text, layerIdx) {
   var textEl = document.getElementById('layerInsightText');
   var btn = document.getElementById('layerInsightBtn');
   textEl.textContent = text;
-  btn.textContent = (layerIdx === 4) ? '加油最后一轮啦 💪' : '我们继续吧';
+  var btnTexts = [
+    '走，往高处去 🌿',
+    '视野越来越开阔了 🏞️',
+    '半山腰的风景，值得驻足 🍃',
+    '山顶的轮廓已经清晰了 ⛰️',
+    '加油最后一轮啦 💪'
+  ];
+  btn.textContent = btnTexts[layerIdx] || '我们继续吧';
   // 重新触发动画
   textEl.style.animation = 'none';
   btn.style.animation = 'none';
