@@ -175,11 +175,37 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","P
 @keyframes insightFadeIn{0%{opacity:0;transform:translateY(20px) scale(0.95)}100%{opacity:1;transform:translateY(0) scale(1)}}
 
 
-/* ===== 结果页底部二维码区域 ===== */
-.qr-section{width:100%;max-width:420px;text-align:center;padding:28px 20px 20px;margin-bottom:12px;background:var(--card);border-radius:20px;border:1px solid rgba(74,58,255,0.1)}
-.qr-section canvas{display:block;margin:0 auto 12px;border-radius:8px}
-.qr-scan-hint{font-size:13px;color:var(--text-dim);margin-bottom:14px;line-height:1.6}
-.qr-screenshot-hint{font-size:12px;color:rgba(232,230,240,0.35);line-height:1.6}
+/* ===== 汇总页样式 ===== */
+.sum-brand{text-align:center;padding:32px 20px 0}
+.sum-brand-top{font-size:11px;color:rgba(232,230,240,0.4);letter-spacing:2px;margin-bottom:4px}
+.sum-brand-main{font-size:18px;font-weight:700;background:linear-gradient(135deg,#fff,#00D2FF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.5}
+.sum-user{text-align:center;padding:20px 0 8px}
+.sum-nickname{font-size:14px;color:var(--text-dim);margin-bottom:6px}
+.sum-highlight{font-size:22px;font-weight:700;color:#fff;line-height:1.5}
+.sum-highlight span{color:var(--accent2)}
+.sum-time{font-size:11px;color:rgba(232,230,240,0.3);margin-top:4px}
+.sum-radar-wrap{width:280px;height:280px;margin:16px auto 20px}
+.sum-radar-wrap canvas{width:100%;height:auto;display:block}
+.sum-scores{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:20px}
+.sum-score-item{display:flex;align-items:center;gap:6px;padding:8px 12px;background:var(--card);border-radius:10px;font-size:13px;color:var(--text-dim);border:1px solid rgba(74,58,255,0.1)}
+.sum-score-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.sum-score-val{font-weight:700;color:#fff;font-size:14px}
+.sum-score-item.is-stuck{border-color:rgba(255,107,157,0.3);background:rgba(255,107,157,0.05)}
+.sum-score-item.is-stuck .sum-score-val{color:var(--accent2)}
+.sum-card{background:var(--card);border-radius:16px;padding:20px;margin-bottom:14px;border:1px solid rgba(74,58,255,0.1)}
+.sum-card-title{font-size:15px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.sum-insight{font-size:13px;color:var(--text-dim);line-height:1.9}
+.sum-step{display:flex;gap:10px;align-items:flex-start;margin-bottom:12px}
+.sum-step:last-child{margin-bottom:0}
+.sum-step-num{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-light));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;color:#fff}
+.sum-step-text{flex:1;font-size:13px;color:var(--text-dim);line-height:1.7}
+.sum-step-text strong{color:#fff;display:block;margin-bottom:2px;font-size:14px}
+.sum-quote{font-size:13px;color:var(--accent);font-style:italic;padding:14px 16px;background:rgba(0,210,255,0.06);border-radius:10px;border-left:3px solid var(--accent);line-height:1.7;margin-bottom:14px}
+.sum-qr-wrap{text-align:center;padding:24px 0 8px}
+.sum-qr-wrap canvas{display:block;margin:0 auto 12px;border-radius:8px}
+.sum-qr-hint{font-size:13px;color:var(--text-dim);margin-bottom:12px;line-height:1.6}
+.sum-screenshot-hint{font-size:12px;color:rgba(232,230,240,0.35);line-height:1.6}
+.sum-divider{width:40px;height:2px;background:linear-gradient(90deg,var(--primary),var(--accent));margin:0 auto 16px;border-radius:1px}
 
 
 .nickname-input{width:100%;max-width:320px;padding:14px 18px;background:var(--card);border:1px solid rgba(74,58,255,0.2);border-radius:12px;color:var(--text);font-size:14px;text-align:center;margin-bottom:16px;outline:none;transition:border-color .3s}
@@ -287,14 +313,12 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","P
     </div>
   </div>
   <div class="report-section" id="analysisSection" style="width:100%;max-width:420px"></div>
-  <div class="qr-section report-section" id="qrSection" style="display:none">
-    <div id="qrCodeContainer"></div>
-    <p class="qr-scan-hint">长按识别二维码 · 测测你的卡点在哪一层</p>
-    <p class="qr-screenshot-hint">📸 如需保存，请直接截图即可</p>
-  </div>
   <div class="share-section report-section" style="flex-wrap:wrap">
     <button class="share-btn secondary" onclick="restartQuiz()">🔄 重新测试</button>
     <button class="share-btn primary" onclick="showShare()">📤 分享测试</button>
+  </div>
+  <div class="report-section" style="width:100%;max-width:420px;margin-bottom:40px">
+    <button class="share-btn primary" onclick="showSummary()" style="width:100%;padding:18px;font-size:16px;background:linear-gradient(135deg,#FF6B9D,#A855F7);box-shadow:0 4px 20px rgba(255,107,157,0.3);border-radius:16px">📋 查看测试结果汇总</button>
   </div>
 </div>
 
@@ -306,6 +330,14 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","P
       <button class="share-btn primary" onclick="copyLink()" style="width:100%;padding:18px;font-size:15px">🎯 看看朋友卡在哪一层</button>
       <button class="share-btn secondary" onclick="closeShare()" style="width:100%">关闭</button>
     </div>
+  </div>
+</div>
+
+<!-- 测试结果汇总页 -->
+<div class="page" id="pageSummary">
+  <div id="summaryContent" style="width:100%;max-width:420px"></div>
+  <div style="width:100%;max-width:420px;margin-top:16px;margin-bottom:40px">
+    <button class="share-btn secondary" onclick="backToReport()" style="width:100%;padding:16px;font-size:15px">← 返回详细报告</button>
   </div>
 </div>
 
@@ -694,53 +726,6 @@ function generateReport() {
 
   // 保存结果用于分享和撬动点精准识别
   window._reportResult = { avgs: avgs, stuckLayers: stuckLayers };
-
-  // 渲染页面内二维码
-  renderInlineQR();
-}
-
-// ===== 在结果页内渲染二维码 =====
-function renderInlineQR() {
-  var container = document.getElementById('qrCodeContainer');
-  var qrSection = document.getElementById('qrSection');
-  if (!container || !qrSection) return;
-
-  var testUrl = window.location.href.split('?')[0].split('#')[0];
-
-  try {
-    var qr = qrcode(0, 'M');
-    qr.addData(testUrl);
-    qr.make();
-
-    var moduleCount = qr.getModuleCount();
-    var cellSize = 5;
-    var size = moduleCount * cellSize;
-    var qrCanvas = document.createElement('canvas');
-    qrCanvas.width = size;
-    qrCanvas.height = size;
-    qrCanvas.style.width = size + 'px';
-    qrCanvas.style.height = size + 'px';
-    qrCanvas.style.borderRadius = '8px';
-
-    var qrCtx = qrCanvas.getContext('2d');
-    // 白色背景
-    qrCtx.fillStyle = '#ffffff';
-    qrCtx.fillRect(0, 0, size, size);
-    // 绘制黑色模块
-    qrCtx.fillStyle = '#000000';
-    for (var row = 0; row < moduleCount; row++) {
-      for (var col = 0; col < moduleCount; col++) {
-        if (qr.isDark(row, col)) {
-          qrCtx.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
-        }
-      }
-    }
-    container.innerHTML = '';
-    container.appendChild(qrCanvas);
-    qrSection.style.display = 'block';
-  } catch(e) {
-    console.error('QR code generation failed:', e);
-  }
 }
 
 // ===== 雷达图绘制 =====
@@ -919,6 +904,7 @@ function selectLeveragePoint(idx) {
 function selectBlocker(idx) {
   var layerIdx = window._coachLayer;
   var blocker = blockers[idx];
+  window._coachBlocker = blocker;
   var coaching = layerCoaching[layerIdx];
   
   // 隐藏第二步
@@ -1053,8 +1039,234 @@ function restartQuiz() {
   showPage('pageWelcome');
 }
 
+// ===== 测试结果汇总页 =====
+function showSummary() {
+  if (!window._reportResult) { showToast('请完成测试后再生成汇总'); return; }
+
+  var avgs = window._reportResult.avgs;
+  var stuckLayers = window._reportResult.stuckLayers;
+  var mainStuck = stuckLayers[0];
+  var l = layers[mainStuck];
+  var nickname = window._userNickname || '';
+  var coachLayerIdx = window._coachLayer;
+  var coachBlocker = window._coachBlocker;
+  var coaching = (coachLayerIdx != null) ? layerCoaching[coachLayerIdx] : null;
+
+  var now = new Date();
+  var timeStr = now.getFullYear() + '.' + String(now.getMonth()+1).padStart(2,'0') + '.' + String(now.getDate()).padStart(2,'0') + ' ' + String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+
+  // 构建汇总页内容
+  var html = '';
+
+  // 品牌标识
+  html += '<div class="sum-brand">';
+  html += '<div class="sum-brand-top">DAN KOE × NLP逻辑层次</div>';
+  html += '<div class="sum-brand-main">卡点定位 · 测试结果汇总</div>';
+  html += '</div>';
+
+  // 用户信息 + 核心结果
+  html += '<div class="sum-user">';
+  if (nickname) html += '<div class="sum-nickname">' + nickname + ' 的测试结果</div>';
+  html += '<div class="sum-highlight">你的核心撬动点：<span>' + l.icon + ' ' + l.name + '</span></div>';
+  html += '<div class="sum-time">' + timeStr + '</div>';
+  html += '</div>';
+
+  // 迷你雷达图
+  html += '<div class="sum-radar-wrap"><canvas id="summaryRadarCanvas" width="560" height="560"></canvas></div>';
+
+  // 六层得分
+  html += '<div class="sum-scores">';
+  for (var i = 0; i < 6; i++) {
+    var isStuck = stuckLayers.indexOf(i) >= 0;
+    html += '<div class="sum-score-item' + (isStuck ? ' is-stuck' : '') + '">';
+    html += '<div class="sum-score-dot" style="background:' + layers[i].color + '"></div>';
+    html += '<span>' + layers[i].icon + ' ' + layers[i].name + '</span>';
+    html += '<span class="sum-score-val">' + avgs[i].toFixed(1) + '</span>';
+    html += '</div>';
+  }
+  html += '</div>';
+
+  // 核心洞察
+  html += '<div class="sum-card">';
+  html += '<div class="sum-card-title">💡 核心洞察</div>';
+  html += '<div class="sum-insight">' + l.analysis + '</div>';
+  html += '</div>';
+
+  // Dan Koe 引用
+  html += '<div class="sum-quote">' + l.quote + '</div>';
+
+  // 行动建议（如果有撬动点选择结果）
+  if (coachLayerIdx != null && coachBlocker) {
+    html += '<div class="sum-card">';
+    html += '<div class="sum-card-title">🚀 突破行动</div>';
+    for (var s = 0; s < coachBlocker.steps.length; s++) {
+      html += '<div class="sum-step">';
+      html += '<div class="sum-step-num">' + (s + 1) + '</div>';
+      html += '<div class="sum-step-text"><strong>' + coachBlocker.steps[s].title + '</strong>' + coachBlocker.steps[s].text + '</div>';
+      html += '</div>';
+    }
+    html += '</div>';
+  }
+
+  // 分隔线
+  html += '<div class="sum-divider"></div>';
+
+  // 二维码区域
+  html += '<div class="sum-qr-wrap">';
+  html += '<div id="summaryQrContainer"></div>';
+  html += '<div class="sum-qr-hint">长按识别 · 测测你的卡点在哪一层</div>';
+  html += '<div class="sum-screenshot-hint">📸 如需保存，请直接截图即可</div>';
+  html += '</div>';
+
+  document.getElementById('summaryContent').innerHTML = html;
+
+  // 切换到汇总页
+  showPage('pageSummary');
+
+  // 渲染雷达图和二维码（DOM 更新后）
+  setTimeout(function() {
+    drawSummaryRadar(avgs, stuckLayers);
+    renderSummaryQR();
+  }, 100);
+}
+
+function backToReport() {
+  showPage('pageReport');
+}
+
+function drawSummaryRadar(avgs, stuckLayers) {
+  var canvas = document.getElementById('summaryRadarCanvas');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+  var W = canvas.width, H = canvas.height;
+  var cx = W / 2, cy = H / 2;
+  var R = W * 0.34;
+  var n = 6;
+  var angleStep = Math.PI * 2 / n;
+  var startAngle = -Math.PI / 2;
+
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#0F0E1A';
+  ctx.fillRect(0, 0, W, H);
+
+  // 网格线
+  for (var ring = 1; ring <= 5; ring++) {
+    var r = R * ring / 5;
+    ctx.beginPath();
+    for (var i = 0; i <= n; i++) {
+      var angle = startAngle + angleStep * i;
+      var x = cx + r * Math.cos(angle);
+      var y = cy + r * Math.sin(angle);
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.strokeStyle = 'rgba(74,58,255,' + (0.08 + ring * 0.04) + ')';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  }
+
+  // 轴线
+  for (var i = 0; i < n; i++) {
+    var angle = startAngle + angleStep * i;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + R * Math.cos(angle), cy + R * Math.sin(angle));
+    ctx.strokeStyle = 'rgba(74,58,255,0.2)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  }
+
+  // 数据区域
+  ctx.beginPath();
+  for (var i = 0; i < n; i++) {
+    var angle = startAngle + angleStep * i;
+    var r = R * avgs[i] / 5;
+    var x = cx + r * Math.cos(angle);
+    var y = cy + r * Math.sin(angle);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  var grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, R);
+  grad.addColorStop(0, 'rgba(74,58,255,0.3)');
+  grad.addColorStop(1, 'rgba(0,210,255,0.1)');
+  ctx.fillStyle = grad;
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(74,58,255,0.8)';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+
+  // 数据点
+  for (var i = 0; i < n; i++) {
+    var angle = startAngle + angleStep * i;
+    var r = R * avgs[i] / 5;
+    var x = cx + r * Math.cos(angle);
+    var y = cy + r * Math.sin(angle);
+    var isStuck = stuckLayers.indexOf(i) >= 0;
+    ctx.beginPath();
+    ctx.arc(x, y, isStuck ? 9 : 6, 0, Math.PI * 2);
+    ctx.fillStyle = isStuck ? '#FF6B9D' : layers[i].color;
+    ctx.fill();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+
+  // 标签
+  var emojis = ['🌍', '⚡', '🧠', '💎', '👑', '🌟'];
+  for (var i = 0; i < n; i++) {
+    var angle = startAngle + angleStep * i;
+    var lr = R + 50;
+    var x = cx + lr * Math.cos(angle);
+    var y = cy + lr * Math.sin(angle);
+    var isStuck = stuckLayers.indexOf(i) >= 0;
+    ctx.font = '600 20px -apple-system,sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = isStuck ? '#FF6B9D' : '#E8E6F0';
+    ctx.fillText(emojis[i] + ' ' + layers[i].name, x, y);
+    ctx.font = '500 16px -apple-system,sans-serif';
+    ctx.fillStyle = isStuck ? '#FF6B9D' : 'rgba(232,230,240,0.6)';
+    ctx.fillText(avgs[i].toFixed(1) + '分', x, y + 24);
+  }
+}
+
+function renderSummaryQR() {
+  var container = document.getElementById('summaryQrContainer');
+  if (!container) return;
+  var testUrl = window.location.href.split('?')[0].split('#')[0];
+  try {
+    var qr = qrcode(0, 'M');
+    qr.addData(testUrl);
+    qr.make();
+    var moduleCount = qr.getModuleCount();
+    var cellSize = 5;
+    var size = moduleCount * cellSize;
+    var qrCanvas = document.createElement('canvas');
+    qrCanvas.width = size;
+    qrCanvas.height = size;
+    qrCanvas.style.width = size + 'px';
+    qrCanvas.style.height = size + 'px';
+    qrCanvas.style.borderRadius = '8px';
+    var qrCtx = qrCanvas.getContext('2d');
+    qrCtx.fillStyle = '#ffffff';
+    qrCtx.fillRect(0, 0, size, size);
+    qrCtx.fillStyle = '#000000';
+    for (var row = 0; row < moduleCount; row++) {
+      for (var col = 0; col < moduleCount; col++) {
+        if (qr.isDark(row, col)) {
+          qrCtx.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
+        }
+      }
+    }
+    container.innerHTML = '';
+    container.appendChild(qrCanvas);
+  } catch(e) {
+    console.error('QR code generation failed:', e);
+  }
+}
+
 </script>
 
-<script>document.write('<!-- v20260721-go17 -->')</script>
+<script>document.write('<!-- v20260721-go17b-summary -->')</script>
 </body>
 </html>
