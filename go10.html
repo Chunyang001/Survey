@@ -198,8 +198,9 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","P
 .sc-analysis-title{font-size:13px;font-weight:600;color:#fff;margin-bottom:6px}
 .sc-analysis-text{font-size:12px;color:var(--text-dim);line-height:1.7}
 .sc-footer{text-align:center;padding-top:16px;border-top:1px solid rgba(255,255,255,0.06)}
+.sc-footer-qr{margin:0 auto 10px;width:100px;height:100px;background:#fff;border-radius:8px;padding:6px;display:flex;align-items:center;justify-content:center}
+.sc-footer-qr img,.sc-footer-qr table{width:88px;height:88px;image-rendering:pixelated}
 .sc-footer-text{font-size:11px;color:rgba(232,230,240,0.3);line-height:1.6}
-.sc-footer-qr{font-size:10px;color:rgba(232,230,240,0.2);margin-top:6px}
 
 /* 图片预览弹窗 */
 .img-preview-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.92);z-index:1000;flex-direction:column;align-items:center;justify-content:center;padding:20px}
@@ -218,6 +219,7 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","P
 .nickname-input::placeholder{color:var(--text-dim);opacity:0.5}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 </head>
 <body>
 
@@ -354,7 +356,8 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","P
     <div class="sc-scores" id="scScores"></div>
     <div class="sc-analysis" id="scAnalysis"></div>
     <div class="sc-footer">
-      <div class="sc-footer-text">长按识别 · 来测测你的卡点在哪一层</div>
+      <div class="sc-footer-qr" id="scQrCode"></div>
+      <div class="sc-footer-text">长按识别二维码 · 测测你的卡点在哪一层</div>
     </div>
   </div>
 </div>
@@ -1102,6 +1105,17 @@ function saveResultImage() {
     '<div class="sc-analysis-text">' + l.analysis.substring(0, 120) + '...</div>';
   document.getElementById('scAnalysis').innerHTML = analysisHtml;
   
+  // 生成二维码
+  var testUrl = window.location.href.split('?')[0].split('#')[0];
+  try {
+    var qr = qrcode(0, 'M');
+    qr.addData(testUrl);
+    qr.make();
+    document.getElementById('scQrCode').innerHTML = qr.createImgTag(2, 0);
+  } catch(e) {
+    console.error('QR code generation failed:', e);
+  }
+
   // 使用 html2canvas 生成图片
   var card = document.getElementById('shareImageCard');
   showToast('正在生成图片...');
